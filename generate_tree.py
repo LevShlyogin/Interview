@@ -5,8 +5,8 @@
 """
 
 import os
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # ============================================================
 # НАСТРОЙКИ
@@ -259,7 +259,7 @@ def main():
     OUTPUT_FILE.write_text(content, encoding="utf-8")
 
     dirs_count, files_count = count_stats(PROJECT_DIR)
-    print(f"✅ Дерево успешно сгенерировано!")
+    print("✅ Дерево успешно сгенерировано!")
     print(f"   📁 Директорий: {dirs_count}")
     print(f"   📄 Файлов:     {files_count}")
     print(f"   💾 Сохранено:  {OUTPUT_FILE}")

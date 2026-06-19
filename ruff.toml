@@ -1,0 +1,11 @@
+﻿line-length = 120
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "I", "UP", "SIM", "B", "RUF"]
+ignore = ["E501"]
+
+[format]
+quote-style = "double"
+line-ending = "auto"
+skip-magic-trailing-comma = false

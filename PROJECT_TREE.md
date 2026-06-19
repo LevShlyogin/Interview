@@ -1,10 +1,10 @@
-# 🌳 Дерево проекта: brusnika-knowledge-layer
+# 🌳 Дерево проекта: Interview
 
-> Автоматически сгенерировано: `2026-06-19 15:26:26`  
-> Директорий: **14** | Файлов: **64**
+> Автоматически сгенерировано: `2026-06-19 16:35:17`  
+> Директорий: **15** | Файлов: **66**
 
 ```
-brusnika-knowledge-layer/
+Interview/
 ├── 📁 data/
 │   └── 📁 knowledge_base/
 │       ├── 📁 commercial/
@@ -72,8 +72,11 @@ brusnika-knowledge-layer/
 │       ├── 📝 glossary.md
 │       └── 📖 README.md
 ├── 📁 src/
-│   ├── 📁 ingestion/
-│   └── 🐍 __init__.py
+│   └── 📁 brusnika_knowledge_layer/
+│       ├── 📁 ingestion/
+│       │   └── 🐍 parser.py
+│       ├── 🐍 __init__.py
+│       └── 🐍 schema.py
 ├── 📁 tests/
 │   └── 🐍 __init__.py
 ├── 🐍 generate_tree.py

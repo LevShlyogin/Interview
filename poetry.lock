@@ -815,6 +815,21 @@ qdrant-client = ">=1.15.1,<2.0.0"
 fastembed = ["fastembed (>=0.3.3,<1.0.0) ; python_version < \"3.13\" and python_version >= \"3.9\""]
 
 [[package]]
+name = "langchain-text-splitters"
+version = "1.1.2"
+description = "LangChain text splitting utilities"
+optional = false
+python-versions = "<4.0.0,>=3.10.0"
+groups = ["main"]
+files = [
+    {file = "langchain_text_splitters-1.1.2-py3-none-any.whl", hash = "sha256:a2de0d799ff31886429fd6e2e0032df275b60ec817c19059a7b46181cc1c2f10"},
+    {file = "langchain_text_splitters-1.1.2.tar.gz", hash = "sha256:782a723db0a4746ac91e251c7c1d57fd23636e4f38ed733074e28d7a86f41627"},
+]
+
+[package.dependencies]
+langchain-core = ">=1.2.31,<2.0.0"
+
+[[package]]
 name = "langgraph"
 version = "1.2.5"
 description = "Building stateful, multi-actor applications with LLMs"
@@ -3882,4 +3897,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "2caa603a6bdb51e95862569f979e066ed9ad00cee3e04794579b8bbfc2b9097e"
+content-hash = "58f534317b5181db4b4913d6691eaa5a89d317a458cc4be9e59f298ee7884c83"

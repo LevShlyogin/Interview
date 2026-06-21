@@ -46,20 +46,43 @@ def build_rag_graph():
 if __name__ == "__main__":
     app = build_rag_graph()
     
-    initial_state = RAGState(
-        original_query="Какие лимиты по суточным для поездки на стройку СГП?",
-        chat_history=[],
-        user_access_level="internal"
-    )
-    
-    print("\n[🚀] Запуск Agentic RAG графа...\n")
-    final_state = app.invoke(initial_state)
-    
-    print("\n[✅] Выполнение графа завершено. Итоговое состояние:")
-    print("=" * 50)
-    print(f"Сырой вопрос:       {final_state['original_query']}")
-    print(f"Домен поиска:       {final_state['search_domain'].upper()}")
-    print("-" * 50)
-    print(f"Ответ пользователю: {final_state['final_answer']}")
-    print(f"Источники:          {final_state['sources']}")
-    print("=" * 50)
+    print("\n" + "="*60)
+    print("🤖 БРУСНИКА: AGENTIC RAG (Локальный режим | Qwen 2.5 3B)")
+    print("Для выхода введите 'exit' или 'выход'")
+    print("="*60 + "\n")
+
+    chat_memory = []
+
+    while True:
+        user_query = input("\n📝 Ваш вопрос: ")
+        
+        if user_query.lower() in ['exit', 'выход', 'quit']:
+            print("Завершение работы. До свидания!")
+            break
+            
+        if not user_query.strip():
+            continue
+
+        initial_state = RAGState(
+            original_query=user_query,
+            chat_history=chat_memory, 
+            user_access_level="internal"
+        )
+        
+        print("\n[🚀] Обработка запроса...\n")
+        final_state = app.invoke(initial_state)
+        
+        print("\n" + "=" * 60)
+        print(f"🏢 ДОМЕН ПОИСКА: {final_state['search_domain'].upper()}")
+        print("-" * 60)
+        print(f"🤖 ОТВЕТ:\n{final_state['final_answer']}")
+        print("-" * 60)
+        print(f"📚 ИСТОЧНИКИ: {', '.join(final_state['sources']) if final_state['sources'] else 'Нет источников'}")
+        print("=" * 60)
+        
+        chat_memory.append({
+            "user": user_query,
+            "ai": final_state['final_answer']
+        })
+        if len(chat_memory) > 5:
+            chat_memory.pop(0)

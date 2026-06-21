@@ -59,7 +59,7 @@ class HierarchicalSplitter:
 
             # Формируем финальный объект дата-контракта
             payload = ChunkPayload(
-                chunk_id=f"chk_{uuid.uuid4().hex[:8]}",
+                chunk_id=str(uuid.uuid4()),
                 source_file=doc.metadata["source_file"],
                 page_content=content,
                 contextual_text=contextual_text,

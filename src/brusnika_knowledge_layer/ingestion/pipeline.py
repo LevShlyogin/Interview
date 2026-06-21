@@ -1,49 +1,50 @@
 from brusnika_knowledge_layer.ingestion.parser import DocumentParser
 from brusnika_knowledge_layer.ingestion.extractor import TableExtractor
 from brusnika_knowledge_layer.ingestion.splitter import HierarchicalSplitter
+from brusnika_knowledge_layer.database.qdrant_manager import QdrantManager
 
-def test_ingestion_pipeline():
-    print("[1] Инициализация пайплайна...")
+def run_full_ingestion():
+    """Полный цикл загрузки всей базы знаний в Qdrant."""
+    
+    print("[1] Инициализация компонентов пайплайна...")
     parser = DocumentParser()
     extractor = TableExtractor()
     splitter = HierarchicalSplitter()
+    
+    # Инициализация подключения к БД и моделей векторизации
+    db_manager = QdrantManager()
 
-    print("[2] Загрузка документов (Этап 1)...")
+    print("\n[2] Загрузка Markdown-документов с диска (Этап 1)...")
     docs = parser.load_all_documents()
     
     if not docs:
         print("[-] Документы не найдены. Проверьте папку data/knowledge_base")
         return
 
-    # Для теста возьмем первый загруженный документ
-    target_doc = docs[0]
-    print(f"[+] Выбран документ для теста: {target_doc.metadata['source_file']}")
-    print(f"    Связанные документы (linked_docs): {target_doc.metadata['linked_docs']}")
+    print(f"[+] Найдено документов: {len(docs)}")
 
-    print("\n[3] Изоляция таблиц (Этап 2)...")
-    processed_doc, tables = extractor.process_document(target_doc)
-    print(f"[+] Найдено таблиц: {len(tables)}")
-    if tables:
-        print(f"    ID первой таблицы: {tables[0]['table_id']}")
-
-    print("\n[4] Иерархический сплиттинг (Этап 3)...")
-    chunks = splitter.split_document(processed_doc, tables)
-    print(f"[+] Документ нарезан на {len(chunks)} чанков.")
-
-    if chunks:
-        print("\n[5] Инспекция первого чанка (Финальный Payload для Qdrant):")
-        first_chunk = chunks[0]
+    all_chunks = []
+    
+    print("\n[3] Обработка текстов и извлечение таблиц (Этапы 2 и 3)...")
+    for doc in docs:
+        # 1. Вырезаем таблицы и заменяем на плейсхолдеры
+        processed_doc, tables = extractor.process_document(doc)
         
-        print("="*50)
-        print(f"CHUNK ID:      {first_chunk.chunk_id}")
-        print(f"SOURCE:        {first_chunk.source_file}")
-        print(f"HEADERS:       H1: {first_chunk.header_1} | H2: {first_chunk.header_2} | H3: {first_chunk.header_3}")
-        print(f"ACCESS LEVEL:  {first_chunk.access}")
-        print(f"CHUNK TYPE:    {first_chunk.chunk_type}")
-        print("-" * 50)
-        print("CONTEXTUAL TEXT (То, что пойдет в Dense & Sparse векторы):")
-        print(first_chunk.contextual_text)
-        print("="*50)
+        # 2. Режем документ на умные иерархические чанки
+        chunks = splitter.split_document(processed_doc, tables)
+        
+        # 3. Добавляем чанки текущего документа в общий котел
+        all_chunks.extend(chunks)
+
+    print(f"[+] База знаний успешно нарезана на {len(all_chunks)} чанков.")
+
+    if all_chunks:
+        print("\n[4] Векторизация (Dense + Sparse) и загрузка в Qdrant (Этап 4)...")
+        # Передаем весь массив чанков в менеджер БД
+        db_manager.upsert_chunks(all_chunks)
+        print("\n[+] 🚀 Пайплайн ингестии успешно завершен! База данных готова к поиску.")
+    else:
+        print("[-] Не удалось сгенерировать чанки.")
 
 if __name__ == "__main__":
-    test_ingestion_pipeline()
+    run_full_ingestion()

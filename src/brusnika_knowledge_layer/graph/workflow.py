@@ -18,6 +18,7 @@ def build_rag_graph():
     workflow.add_node("retriever", OrchestratorNodes.retrieve_documents)
     workflow.add_node("grader", OrchestratorNodes.grade_documents)
     workflow.add_node("generator", OrchestratorNodes.generate_answer)
+    workflow.add_node("validator", OrchestratorNodes.validate_answer)
     workflow.add_node("fallback", OrchestratorNodes.handle_fallback)
 
     # 2. Выстраиваем жесткие связи (Линейный участок)
@@ -37,7 +38,8 @@ def build_rag_graph():
     )
 
     # 4. Сводим обе ветки к завершению
-    workflow.add_edge("generator", END)
+    workflow.add_edge("generator", "validator")
+    workflow.add_edge("validator", END)
     workflow.add_edge("fallback", END)
 
     app = workflow.compile()

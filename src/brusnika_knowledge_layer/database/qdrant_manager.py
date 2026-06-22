@@ -13,7 +13,7 @@ class QdrantManager:
         # Dense модель (семантика)
         self.dense_model = TextEmbedding(model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
         # Sparse модель (лексика/ключевые слова)
-        self.sparse_model = SparseTextEmbedding(model_name="prithivida/Splade_PP_en_v1")
+        self.sparse_model = SparseTextEmbedding(model_name="Qdrant/bm25")
         
         # Передаем флаг очистки
         self._ensure_collection_exists(recreate_collection)

@@ -2,13 +2,19 @@ from brusnika_knowledge_layer.ingestion.parser import DocumentParser
 from brusnika_knowledge_layer.ingestion.extractor import TableExtractor
 from brusnika_knowledge_layer.ingestion.splitter import HierarchicalSplitter
 from brusnika_knowledge_layer.database.qdrant_manager import QdrantManager
+from langchain_ollama import ChatOllama
 
 def run_full_ingestion():
     """Полный цикл загрузки всей базы знаний в Qdrant."""
     
     print("[1] Инициализация компонентов пайплайна...")
     parser = DocumentParser()
-    extractor = TableExtractor()
+
+    # Инициализируем локальную LLM для чтения таблиц
+    print("    Подключение локальной Qwen 2.5 3B для парсинга таблиц...")
+    llm = ChatOllama(model="qwen2.5:3b", temperature=0)
+
+    extractor = TableExtractor(llm_client=llm)
     splitter = HierarchicalSplitter()
     
     # Инициализация подключения к БД и моделей векторизации

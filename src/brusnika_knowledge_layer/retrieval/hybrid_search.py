@@ -12,7 +12,7 @@ class HybridRetriever:
         
         print("    [Retriever] Загрузка моделей векторизации...")
         self.dense_model = TextEmbedding(model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
-        self.sparse_model = SparseTextEmbedding(model_name="prithivida/Splade_PP_en_v1")
+        self.sparse_model = SparseTextEmbedding(model_name="Qdrant/bm25")
 
         print("    [Retriever] Загрузка модели Reranker (Russian MSMARCO)...")
         # Используем легкую и быструю русскую модель (~700 МБ) для защиты от OOM
@@ -24,8 +24,14 @@ class HybridRetriever:
         dense_query = list(self.dense_model.embed([query]))[0]
         sparse_query = list(self.sparse_model.embed([query]))[0]
 
+        # Пользователь всегда имеет доступ к 'public' + к своему уровню
+        allowed_access = ["public", access_level]
+
         filter_conditions = [
-            models.FieldCondition(key="access", match=models.MatchValue(value=access_level))
+            models.FieldCondition(
+                key="access", 
+                match=models.MatchAny(any=allowed_access)
+            )
         ]
         
         # --- ВАЖНОЕ ИЗМЕНЕНИЕ: Мультидоменная фильтрация ---

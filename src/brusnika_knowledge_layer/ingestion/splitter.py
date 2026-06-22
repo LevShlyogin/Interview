@@ -7,8 +7,6 @@ from brusnika_knowledge_layer.schema import ChunkPayload, RawDocument
 
 class HierarchicalSplitter:
     def __init__(self):
-        # РЕШЕНИЕ ПРОБЛЕМЫ ФРАГМЕНТАЦИИ: Режем только по глобальным блокам.
-        # Теперь все аббревиатуры из "Строительство и проектирование" будут в одном куске.
         headers_to_split_on = [
             ("#", "Header 1"),
             ("##", "Header 2"),
@@ -59,7 +57,7 @@ class HierarchicalSplitter:
                 audience=doc.metadata["audience"],
                 header_1=h1,
                 header_2=h2,
-                header_3=None, # Заглушка, если Pydantic требует это поле
+                header_3=None, # Заглушка
                 linked_docs=doc.metadata["linked_docs"],
                 chunk_type="table_summary" if is_table else "text",
                 parent_id=parent_id

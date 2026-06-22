@@ -14,7 +14,7 @@ def build_rag_graph():
     """Сборка и компиляция графа состояний."""
     workflow = StateGraph(RAGState)
 
-    # 1. Регистрируем все узлы
+    # Регистрируем все узлы
     workflow.add_node("query_rewriter", OrchestratorNodes.rewrite_query)
     workflow.add_node("semantic_router", OrchestratorNodes.route_query)
     workflow.add_node("retriever", OrchestratorNodes.retrieve_documents)
@@ -23,13 +23,13 @@ def build_rag_graph():
     workflow.add_node("validator", OrchestratorNodes.validate_answer)
     workflow.add_node("fallback", OrchestratorNodes.handle_fallback)
 
-    # 2. Выстраиваем жесткие связи (Линейный участок)
+    # Выстраиваем жесткие связи (Линейный участок)
     workflow.add_edge(START, "query_rewriter")
     workflow.add_edge("query_rewriter", "semantic_router")
     workflow.add_edge("semantic_router", "retriever")
     workflow.add_edge("retriever", "grader")
 
-    # 3. УСЛОВНЫЙ ПЕРЕХОД (Ветвление логики)
+    # УСЛОВНЫЙ ПЕРЕХОД (Ветвление логики)
     workflow.add_conditional_edges(
         "grader",               # Из какого узла выходим
         route_after_grader,     # Функция, которая принимает решение
@@ -39,7 +39,7 @@ def build_rag_graph():
         }
     )
 
-    # 4. Сводим обе ветки к завершению
+    # Сводим обе ветки к завершению
     workflow.add_edge("generator", "validator")
     workflow.add_edge("validator", END)
     workflow.add_edge("fallback", END)
@@ -51,14 +51,14 @@ if __name__ == "__main__":
     app = build_rag_graph()
     
     print("\n" + "="*60)
-    print("🤖 БРУСНИКА: AGENTIC RAG (Локальный режим | Qwen 2.5 3B)")
+    print("БРУСНИКА: AGENTIC RAG (Локальный режим | Qwen 2.5 3B)")
     print("Для выхода введите 'exit' или 'выход'")
     print("="*60 + "\n")
 
     chat_memory = []
 
     while True:
-        user_query = input("\n📝 Ваш вопрос: ")
+        user_query = input("\n Ваш вопрос: ")
         
         if user_query.lower() in ['exit', 'выход', 'quit']:
             print("Завершение работы. До свидания!")
@@ -73,15 +73,15 @@ if __name__ == "__main__":
             user_access_level="internal"
         )
         
-        print("\n[🚀] Обработка запроса...\n")
+        print("\n Обработка запроса...\n")
         final_state = app.invoke(initial_state)
         
         print("\n" + "=" * 60)
-        print(f"🏢 ДОМЕН ПОИСКА: {final_state['search_domain'].upper()}")
+        print(f" ДОМЕН ПОИСКА: {final_state['search_domain'].upper()}")
         print("-" * 60)
-        print(f"🤖 ОТВЕТ:\n{final_state['final_answer']}")
+        print(f" ОТВЕТ:\n{final_state['final_answer']}")
         print("-" * 60)
-        print(f"📚 ИСТОЧНИКИ: {', '.join(final_state['sources']) if final_state['sources'] else 'Нет источников'}")
+        print(f" ИСТОЧНИКИ: {', '.join(final_state['sources']) if final_state['sources'] else 'Нет источников'}")
         print("=" * 60)
         
         chat_memory.append({

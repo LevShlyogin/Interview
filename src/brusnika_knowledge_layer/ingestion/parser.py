@@ -18,7 +18,7 @@ class DocumentParser:
         raw_metadata = parsed_file.metadata
         content = parsed_file.content
 
-        # Безопасное извлечение связанных документов (приведение к списку строк)
+        # Извлечение связанных документов
         related = raw_metadata.get("related", [])
         if isinstance(related, str):
             linked_docs = [related]
@@ -27,7 +27,7 @@ class DocumentParser:
         else:
             linked_docs = []
 
-        # Нормализация метаданных под нашу единую Pydantic-схему
+        # Нормализация метаданных под Pydantic-схему
         normalized_metadata = {
             "source_file": file_path.name,
             "domain": str(raw_metadata.get("domain", "general")).lower(),

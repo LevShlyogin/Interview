@@ -22,7 +22,7 @@ class TableExtractor:
             print("      [LLM] Генерирую саммари для таблицы...")
             prompt = f"Сделай подробное текстовое описание данных из этой Markdown-таблицы. Пиши только описание, без лишних вступлений:\n\n{raw_table}"
             
-            # Реальный вызов локальной модели
+            # Вызов локальной модели
             response = self.llm_client.invoke(prompt)
             return response.content
 
@@ -42,7 +42,7 @@ class TableExtractor:
             table_id = f"tbl_{uuid.uuid4().hex[:8]}"
             placeholder = f"{{{{TABLE_ID:{table_id}}}}}"
             
-            # Генерируем саммари (сработает Qwen3/Gemini)
+            # Генерируем саммари
             summary = self.generate_summary(raw_table)
             
             extracted_tables.append({

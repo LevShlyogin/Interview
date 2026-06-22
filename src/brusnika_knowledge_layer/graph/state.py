@@ -11,7 +11,7 @@ class RAGState(BaseModel):
     chat_history: list[dict[str, str]] = Field(default_factory=list, description="История диалога (роль, текст)")
     user_access_level: str = Field(default="internal", description="Уровень доступа пользователя (из токена)")
     
-    # Промежуточные данные (Результат работы узлов)
+    # Промежуточные данные
     rewritten_query: str | None = Field(default=None, description="Переписанный вопрос (без анафоры)")
     search_domain: str = Field(default="all", description="Выявленный домен для фильтрации в Qdrant")
     
@@ -23,6 +23,6 @@ class RAGState(BaseModel):
     final_answer: str | None = Field(default=None, description="Сгенерированный ответ Gemini")
     sources: list[str] = Field(default_factory=list, description="Список файлов-источников")
     
-    # Флаги маршрутизации (Управляют графом)
+    # Флаги маршрутизации
     is_context_relevant: bool = Field(default=False, description="Нашел ли Grader полезную информацию?")
     needs_clarification: bool = Field(default=False, description="Требуется ли уточнение от пользователя?")

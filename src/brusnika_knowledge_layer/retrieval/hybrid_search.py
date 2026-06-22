@@ -6,7 +6,7 @@ from sentence_transformers import CrossEncoder
 
 
 class HybridRetriever:
-    """Боевой интерфейс для работы с Qdrant: Hybrid Search + Reranking (Cross-Encoder)."""
+    """Интерфейс для работы с Qdrant: Hybrid Search + Reranking (Cross-Encoder)."""
     
     def __init__(self, collection_name: str = "brusnika_knowledge"):
         self.collection_name = collection_name
@@ -17,7 +17,7 @@ class HybridRetriever:
         self.sparse_model = SparseTextEmbedding(model_name="Qdrant/bm25")
 
         print("    [Retriever] Загрузка модели Reranker (Russian MSMARCO)...")
-        # Используем легкую и быструю русскую модель (~700 МБ) для защиты от OOM
+        # Используем легкую и быструю модель
         self.reranker = CrossEncoder("DiTy/cross-encoder-russian-msmarco", max_length=512)
 
     def search(self, query: str, domain: str, access_level: str, final_limit: int = 5) -> list[dict[str, Any]]:
@@ -36,8 +36,7 @@ class HybridRetriever:
             )
         ]
         
-        # --- ВАЖНОЕ ИЗМЕНЕНИЕ: Мультидоменная фильтрация ---
-        # Если домен конкретный (например, construction), ищем в нём И в глобальном справочнике (company).
+        # Если домен конкретный (например, construction), ищем в нём И в глобальном справочнике
         if domain.lower() not in ["all", "general"]:
             filter_conditions.append(
                 models.FieldCondition(
@@ -48,7 +47,7 @@ class HybridRetriever:
         
         query_filter = models.Filter(must=filter_conditions)
 
-        # 1. ШИРОКИЙ ЗАХВАТ
+        # ШИРОКИЙ ЗАХВАТ
         fetch_limit = final_limit * 3 
         print(f"    [Qdrant] Извлекаю топ-{fetch_limit} кандидатов для Reranker'а (domain={domain} + company)...")
         
@@ -66,7 +65,7 @@ class HybridRetriever:
         if not results.points:
             return []
 
-        # 2. ПОДГОТОВКА К РАНЖИРОВАНИЮ
+        # ПОДГОТОВКА К РАНЖИРОВАНИЮ
         candidates = []
         docs_for_reranking = [] 
         
@@ -80,7 +79,7 @@ class HybridRetriever:
             })
             docs_for_reranking.append([query, payload.get("page_content", "")])
 
-        # 3. ПЕРЕРАНЖИРОВАНИЕ
+        # ПЕРЕРАНЖИРОВАНИЕ
         print(f"    [Reranker] Читаю тексты и расставляю {len(candidates)} кандидатов по идеальным местам...")
         rerank_scores = self.reranker.predict(docs_for_reranking)
 
@@ -89,7 +88,7 @@ class HybridRetriever:
 
         candidates.sort(key=lambda x: x["rerank_score"], reverse=True)
 
-        # 4. ФИНАЛЬНЫЙ СРЕЗ
+        # ФИНАЛЬНЫЙ СРЕЗ
         best_chunks = candidates[:final_limit]
         print(f"    [Reranker] Топ-1 документ получил оценку точности: {best_chunks[0]['rerank_score']:.4f}")
         

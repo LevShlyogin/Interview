@@ -92,3 +92,10 @@ poetry run python -m brusnika_knowledge_layer.ingestion.pipeline
 
 ```bash
 poetry run streamlit run src/brusnika_knowledge_layer/app.py
+```
+
+### 5. Запуск тестов
+
+```bash
+poetry run python run_eval.py
+```

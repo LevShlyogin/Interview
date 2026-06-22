@@ -1,7 +1,8 @@
 import re
 import uuid
-from typing import Dict, List, Tuple
+
 from brusnika_knowledge_layer.schema import RawDocument
+
 
 class TableExtractor:
     def __init__(self, llm_client=None):
@@ -14,17 +15,18 @@ class TableExtractor:
         self.table_regex = re.compile(r"(^\|.+?\|$\n)+^\|.+?\|$", re.MULTILINE)
 
     def generate_summary(self, raw_table: str) -> str:
-        """Метод для обращения к LLM за саммаризацией таблицы."""
-        if not self.llm_client:
-            # Заглушка, если LLM еще не подключена
-            return "Сгенерированное текстовое описание данных из таблицы (Mock)."
-        
-        # Здесь будет реальный вызов LLM
-        prompt = f"Сделай подробное текстовое описание данных из этой Markdown-таблицы:\n\n{raw_table}"
-        # return self.llm_client.invoke(prompt)
-        return "Здесь будет ответ LLM."
+            """Метод для обращения к LLM за саммаризацией таблицы."""
+            if not self.llm_client:
+                return "Сгенерированное текстовое описание данных из таблицы (Mock)."
+            
+            print("      [LLM] Генерирую саммари для таблицы...")
+            prompt = f"Сделай подробное текстовое описание данных из этой Markdown-таблицы. Пиши только описание, без лишних вступлений:\n\n{raw_table}"
+            
+            # Вызов локальной модели
+            response = self.llm_client.invoke(prompt)
+            return response.content
 
-    def process_document(self, doc: RawDocument) -> Tuple[RawDocument, List[Dict[str, str]]]:
+    def process_document(self, doc: RawDocument) -> tuple[RawDocument, list[dict[str, str]]]:
         """
         Находит таблицы, заменяет их на ID и возвращает измененный документ + список извлеченных таблиц.
         """
@@ -40,7 +42,7 @@ class TableExtractor:
             table_id = f"tbl_{uuid.uuid4().hex[:8]}"
             placeholder = f"{{{{TABLE_ID:{table_id}}}}}"
             
-            # Генерируем саммари (сработает Qwen3/Gemini)
+            # Генерируем саммари
             summary = self.generate_summary(raw_table)
             
             extracted_tables.append({

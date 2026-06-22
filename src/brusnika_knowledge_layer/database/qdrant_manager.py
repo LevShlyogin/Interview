@@ -1,7 +1,8 @@
+from fastembed import SparseTextEmbedding, TextEmbedding
 from qdrant_client import QdrantClient, models
-from fastembed import TextEmbedding, SparseTextEmbedding
-from typing import List
+
 from brusnika_knowledge_layer.schema import ChunkPayload
+
 
 class QdrantManager:
     def __init__(self, collection_name: str = "brusnika_knowledge", recreate_collection: bool = True):
@@ -13,7 +14,7 @@ class QdrantManager:
         # Dense модель (семантика)
         self.dense_model = TextEmbedding(model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
         # Sparse модель (лексика/ключевые слова)
-        self.sparse_model = SparseTextEmbedding(model_name="prithivida/Splade_PP_en_v1")
+        self.sparse_model = SparseTextEmbedding(model_name="Qdrant/bm25")
         
         # Передаем флаг очистки
         self._ensure_collection_exists(recreate_collection)
@@ -21,12 +22,12 @@ class QdrantManager:
     def _ensure_collection_exists(self, recreate_collection: bool):
         """Создает коллекцию с поддержкой Hybrid Search. Удаляет старую, если нужно."""
         
-        # 1. Сносим старую коллекцию (на 1024 измерения), если она есть
+        # 1. Сносим старую коллекцию, если она есть
         if recreate_collection and self.client.collection_exists(self.collection_name):
             print(f"[Qdrant] 🧹 Удаляю старую коллекцию '{self.collection_name}' для чистой заливки...")
             self.client.delete_collection(collection_name=self.collection_name)
 
-        # 2. Создаем новую чистую коллекцию на 384 измерения
+        # 2. Создаем новую чистую коллекцию
         if not self.client.collection_exists(self.collection_name):
             print(f"[Qdrant] 🏗 Создаю новую коллекцию: {self.collection_name}")
             self.client.create_collection(
@@ -56,7 +57,7 @@ class QdrantManager:
                 field_schema=models.PayloadSchemaType.KEYWORD
             )
             
-    def upsert_chunks(self, payloads: List[ChunkPayload]):
+    def upsert_chunks(self, payloads: list[ChunkPayload]):
         """Векторизует тексты и загружает их в БД мелкими батчами (защита от OOM)."""
         if not payloads:
             return
@@ -64,7 +65,7 @@ class QdrantManager:
         total_chunks = len(payloads)
         print(f"[Qdrant] Начинаю безопасную векторизацию и загрузку {total_chunks} чанков...")
         
-        # Микро-батч для защиты оперативной памяти от SPLADE
+        # Микро-батч для защиты оперативной памяти
         upload_batch_size = 8 
         
         for i in range(0, total_chunks, upload_batch_size):
@@ -93,7 +94,7 @@ class QdrantManager:
                     )
                 )
 
-            # Отправляем этот микро-батч в базу
+            # Отправляем батч в базу
             self.client.upsert(
                 collection_name=self.collection_name,
                 points=points

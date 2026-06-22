@@ -1,10 +1,12 @@
+from typing import Any
+
+from fastembed import SparseTextEmbedding, TextEmbedding
 from qdrant_client import QdrantClient, models
-from fastembed import TextEmbedding, SparseTextEmbedding
 from sentence_transformers import CrossEncoder
-from typing import List, Dict, Any
+
 
 class HybridRetriever:
-    """Боевой интерфейс для работы с Qdrant: Hybrid Search + Reranking (Cross-Encoder)."""
+    """Интерфейс для работы с Qdrant: Hybrid Search + Reranking (Cross-Encoder)."""
     
     def __init__(self, collection_name: str = "brusnika_knowledge"):
         self.collection_name = collection_name
@@ -12,24 +14,29 @@ class HybridRetriever:
         
         print("    [Retriever] Загрузка моделей векторизации...")
         self.dense_model = TextEmbedding(model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
-        self.sparse_model = SparseTextEmbedding(model_name="prithivida/Splade_PP_en_v1")
+        self.sparse_model = SparseTextEmbedding(model_name="Qdrant/bm25")
 
         print("    [Retriever] Загрузка модели Reranker (Russian MSMARCO)...")
-        # Используем легкую и быструю русскую модель (~700 МБ) для защиты от OOM
+        # Используем легкую и быструю модель
         self.reranker = CrossEncoder("DiTy/cross-encoder-russian-msmarco", max_length=512)
 
-    def search(self, query: str, domain: str, access_level: str, final_limit: int = 5) -> List[Dict[str, Any]]:
-        print(f"    [Qdrant] Векторизация вопроса...")
+    def search(self, query: str, domain: str, access_level: str, final_limit: int = 5) -> list[dict[str, Any]]:
+        print("    [Qdrant] Векторизация вопроса...")
         
-        dense_query = list(self.dense_model.embed([query]))[0]
-        sparse_query = list(self.sparse_model.embed([query]))[0]
+        dense_query = next(iter(self.dense_model.embed([query])))
+        sparse_query = next(iter(self.sparse_model.embed([query])))
+
+        # Пользователь всегда имеет доступ к 'public' + к своему уровню
+        allowed_access = ["public", access_level]
 
         filter_conditions = [
-            models.FieldCondition(key="access", match=models.MatchValue(value=access_level))
+            models.FieldCondition(
+                key="access", 
+                match=models.MatchAny(any=allowed_access)
+            )
         ]
         
-        # --- ВАЖНОЕ ИЗМЕНЕНИЕ: Мультидоменная фильтрация ---
-        # Если домен конкретный (например, construction), ищем в нём И в глобальном справочнике (company).
+        # Если домен конкретный (например, construction), ищем в нём И в глобальном справочнике
         if domain.lower() not in ["all", "general"]:
             filter_conditions.append(
                 models.FieldCondition(
@@ -40,7 +47,7 @@ class HybridRetriever:
         
         query_filter = models.Filter(must=filter_conditions)
 
-        # 1. ШИРОКИЙ ЗАХВАТ
+        # ШИРОКИЙ ЗАХВАТ
         fetch_limit = final_limit * 3 
         print(f"    [Qdrant] Извлекаю топ-{fetch_limit} кандидатов для Reranker'а (domain={domain} + company)...")
         
@@ -58,7 +65,7 @@ class HybridRetriever:
         if not results.points:
             return []
 
-        # 2. ПОДГОТОВКА К РАНЖИРОВАНИЮ
+        # ПОДГОТОВКА К РАНЖИРОВАНИЮ
         candidates = []
         docs_for_reranking = [] 
         
@@ -72,7 +79,7 @@ class HybridRetriever:
             })
             docs_for_reranking.append([query, payload.get("page_content", "")])
 
-        # 3. ПЕРЕРАНЖИРОВАНИЕ
+        # ПЕРЕРАНЖИРОВАНИЕ
         print(f"    [Reranker] Читаю тексты и расставляю {len(candidates)} кандидатов по идеальным местам...")
         rerank_scores = self.reranker.predict(docs_for_reranking)
 
@@ -81,7 +88,7 @@ class HybridRetriever:
 
         candidates.sort(key=lambda x: x["rerank_score"], reverse=True)
 
-        # 4. ФИНАЛЬНЫЙ СРЕЗ
+        # ФИНАЛЬНЫЙ СРЕЗ
         best_chunks = candidates[:final_limit]
         print(f"    [Reranker] Топ-1 документ получил оценку точности: {best_chunks[0]['rerank_score']:.4f}")
         

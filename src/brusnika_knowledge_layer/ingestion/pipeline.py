@@ -1,14 +1,22 @@
-from brusnika_knowledge_layer.ingestion.parser import DocumentParser
-from brusnika_knowledge_layer.ingestion.extractor import TableExtractor
-from brusnika_knowledge_layer.ingestion.splitter import HierarchicalSplitter
+from langchain_ollama import ChatOllama
+
 from brusnika_knowledge_layer.database.qdrant_manager import QdrantManager
+from brusnika_knowledge_layer.ingestion.extractor import TableExtractor
+from brusnika_knowledge_layer.ingestion.parser import DocumentParser
+from brusnika_knowledge_layer.ingestion.splitter import HierarchicalSplitter
+
 
 def run_full_ingestion():
     """Полный цикл загрузки всей базы знаний в Qdrant."""
     
     print("[1] Инициализация компонентов пайплайна...")
     parser = DocumentParser()
-    extractor = TableExtractor()
+
+    # Инициализируем локальную LLM для чтения таблиц
+    print("    Подключение локальной Qwen 2.5 3B для парсинга таблиц...")
+    llm = ChatOllama(model="qwen2.5:3b", temperature=0)
+
+    extractor = TableExtractor(llm_client=llm)
     splitter = HierarchicalSplitter()
     
     # Инициализация подключения к БД и моделей векторизации
@@ -27,13 +35,13 @@ def run_full_ingestion():
     
     print("\n[3] Обработка текстов и извлечение таблиц (Этапы 2 и 3)...")
     for doc in docs:
-        # 1. Вырезаем таблицы и заменяем на плейсхолдеры
+        # Вырезаем таблицы и заменяем на плейсхолдеры
         processed_doc, tables = extractor.process_document(doc)
         
-        # 2. Режем документ на умные иерархические чанки
+        # Режем документ на иерархические чанки
         chunks = splitter.split_document(processed_doc, tables)
         
-        # 3. Добавляем чанки текущего документа в общий котел
+        # Добавляем чанки текущего документа в общий котел
         all_chunks.extend(chunks)
 
     print(f"[+] База знаний успешно нарезана на {len(all_chunks)} чанков.")
@@ -42,7 +50,7 @@ def run_full_ingestion():
         print("\n[4] Векторизация (Dense + Sparse) и загрузка в Qdrant (Этап 4)...")
         # Передаем весь массив чанков в менеджер БД
         db_manager.upsert_chunks(all_chunks)
-        print("\n[+] 🚀 Пайплайн ингестии успешно завершен! База данных готова к поиску.")
+        print("\n[+] Пайплайн ингестии успешно завершен! База данных готова к поиску.")
     else:
         print("[-] Не удалось сгенерировать чанки.")
 

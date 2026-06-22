@@ -1,7 +1,9 @@
+from typing import Any
+
+from fastembed import SparseTextEmbedding, TextEmbedding
 from qdrant_client import QdrantClient, models
-from fastembed import TextEmbedding, SparseTextEmbedding
 from sentence_transformers import CrossEncoder
-from typing import List, Dict, Any
+
 
 class HybridRetriever:
     """Боевой интерфейс для работы с Qdrant: Hybrid Search + Reranking (Cross-Encoder)."""
@@ -18,11 +20,11 @@ class HybridRetriever:
         # Используем легкую и быструю русскую модель (~700 МБ) для защиты от OOM
         self.reranker = CrossEncoder("DiTy/cross-encoder-russian-msmarco", max_length=512)
 
-    def search(self, query: str, domain: str, access_level: str, final_limit: int = 5) -> List[Dict[str, Any]]:
-        print(f"    [Qdrant] Векторизация вопроса...")
+    def search(self, query: str, domain: str, access_level: str, final_limit: int = 5) -> list[dict[str, Any]]:
+        print("    [Qdrant] Векторизация вопроса...")
         
-        dense_query = list(self.dense_model.embed([query]))[0]
-        sparse_query = list(self.sparse_model.embed([query]))[0]
+        dense_query = next(iter(self.dense_model.embed([query])))
+        sparse_query = next(iter(self.sparse_model.embed([query])))
 
         # Пользователь всегда имеет доступ к 'public' + к своему уровню
         allowed_access = ["public", access_level]

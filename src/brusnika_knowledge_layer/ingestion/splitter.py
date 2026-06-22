@@ -1,7 +1,9 @@
 import uuid
-from typing import List, Dict
+
 from langchain_text_splitters import MarkdownHeaderTextSplitter
-from brusnika_knowledge_layer.schema import RawDocument, ChunkPayload
+
+from brusnika_knowledge_layer.schema import ChunkPayload, RawDocument
+
 
 class HierarchicalSplitter:
     def __init__(self):
@@ -13,13 +15,13 @@ class HierarchicalSplitter:
         ]
         self.splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on)
 
-    def _build_contextual_text(self, headers: Dict[str, str], content: str) -> str:
+    def _build_contextual_text(self, headers: dict[str, str], content: str) -> str:
         path = " -> ".join(headers.values())
         if path:
             return f"[{path}]\n{content.strip()}"
         return content.strip()
 
-    def split_document(self, doc: RawDocument, extracted_tables: List[Dict[str, str]]) -> List[ChunkPayload]:
+    def split_document(self, doc: RawDocument, extracted_tables: list[dict[str, str]]) -> list[ChunkPayload]:
         chunks = self.splitter.split_text(doc.page_content)
         payloads = []
         tables_dict = {t["table_id"]: t for t in extracted_tables}

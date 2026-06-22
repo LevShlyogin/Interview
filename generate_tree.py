@@ -69,10 +69,7 @@ def should_ignore_dir(name: str) -> bool:
     if name in IGNORE_DIRS:
         return True
     # Проверка паттернов вроде *.egg-info
-    for pattern in IGNORE_DIRS:
-        if pattern.startswith("*") and name.endswith(pattern[1:]):
-            return True
-    return False
+    return any(pattern.startswith("*") and name.endswith(pattern[1:]) for pattern in IGNORE_DIRS)
 
 
 def should_ignore_file(name: str) -> bool:
@@ -80,9 +77,7 @@ def should_ignore_file(name: str) -> bool:
     if name in IGNORE_FILES:
         return True
     _, ext = os.path.splitext(name)
-    if ext.lower() in IGNORE_EXTENSIONS:
-        return True
-    return False
+    return ext.lower() in IGNORE_EXTENSIONS
 
 
 def generate_tree(directory: Path, prefix: str = "", depth: int = 0) -> list[str]:
@@ -203,7 +198,7 @@ def count_stats(directory: Path) -> tuple[int, int]:
         # Фильтруем директории на месте
         dirs[:] = [d for d in dirs if not should_ignore_dir(d)]
         
-        for d in dirs:
+        for _d in dirs:
             dirs_count += 1
         for f in files:
             if not should_ignore_file(f):

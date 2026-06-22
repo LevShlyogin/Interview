@@ -1,8 +1,10 @@
 import os
-import frontmatter
 from pathlib import Path
-from typing import List
+
+import frontmatter
+
 from src.brusnika_knowledge_layer.schema import RawDocument
+
 
 class DocumentParser:
     def __init__(self, data_dir: str = "data/knowledge_base"):
@@ -10,7 +12,7 @@ class DocumentParser:
 
     def parse_file(self, file_path: Path) -> RawDocument:
         """Считывает файл, извлекает YAML-frontmatter и нормализует под дата-контракт."""
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             parsed_file = frontmatter.load(f)
 
         raw_metadata = parsed_file.metadata
@@ -40,7 +42,7 @@ class DocumentParser:
             metadata=normalized_metadata
         )
 
-    def load_all_documents(self) -> List[RawDocument]:
+    def load_all_documents(self) -> list[RawDocument]:
         """Итерирует по директории и собирает все валидные файлы .md."""
         documents = []
         if not self.data_dir.exists():

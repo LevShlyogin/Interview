@@ -1,7 +1,9 @@
+
+from fastembed import SparseTextEmbedding, TextEmbedding
 from qdrant_client import QdrantClient, models
-from fastembed import TextEmbedding, SparseTextEmbedding
-from typing import List
+
 from brusnika_knowledge_layer.schema import ChunkPayload
+
 
 class QdrantManager:
     def __init__(self, collection_name: str = "brusnika_knowledge", recreate_collection: bool = True):
@@ -56,7 +58,7 @@ class QdrantManager:
                 field_schema=models.PayloadSchemaType.KEYWORD
             )
             
-    def upsert_chunks(self, payloads: List[ChunkPayload]):
+    def upsert_chunks(self, payloads: list[ChunkPayload]):
         """Векторизует тексты и загружает их в БД мелкими батчами (защита от OOM)."""
         if not payloads:
             return

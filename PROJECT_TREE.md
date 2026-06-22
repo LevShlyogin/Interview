@@ -1,10 +1,12 @@
 # 🌳 Дерево проекта: Interview
 
-> Автоматически сгенерировано: `2026-06-19 16:35:17`  
-> Директорий: **15** | Файлов: **66**
+> Автоматически сгенерировано: `2026-06-22 13:17:27`  
+> Директорий: **19** | Файлов: **77**
 
 ```
 Interview/
+├── 📁 _archive/
+│   └── 📝 test_task_Shlyogin.md
 ├── 📁 data/
 │   └── 📁 knowledge_base/
 │       ├── 📁 commercial/
@@ -73,19 +75,32 @@ Interview/
 │       └── 📖 README.md
 ├── 📁 src/
 │   └── 📁 brusnika_knowledge_layer/
+│       ├── 📁 database/
+│       │   └── 🐍 qdrant_manager.py
+│       ├── 📁 graph/
+│       │   ├── 🐍 nodes.py
+│       │   ├── 🐍 state.py
+│       │   └── 🐍 workflow.py
 │       ├── 📁 ingestion/
-│       │   └── 🐍 parser.py
+│       │   ├── 🐍 extractor.py
+│       │   ├── 🐍 parser.py
+│       │   ├── 🐍 pipeline.py
+│       │   └── 🐍 splitter.py
+│       ├── 📁 retrieval/
+│       │   └── 🐍 hybrid_search.py
 │       ├── 🐍 __init__.py
+│       ├── 🐍 app.py
 │       └── 🐍 schema.py
 ├── 📁 tests/
 │   └── 🐍 __init__.py
+├── 📝 ARCHITECTURE.md
+├── 🐍 check_tables.py
 ├── 🐍 generate_tree.py
 ├── 🔒 poetry.lock
 ├── 📦 pyproject.toml
 ├── 📖 README.md
 ├── ⚙️ ruff.toml
-├── 📝 test-questions.md
-└── 📝 test_task_Shlyogin.md
+└── 📝 test-questions.md
 ```
 
 ---

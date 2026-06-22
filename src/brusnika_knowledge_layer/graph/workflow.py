@@ -1,6 +1,8 @@
-from langgraph.graph import StateGraph, START, END
-from brusnika_knowledge_layer.graph.state import RAGState
+from langgraph.graph import END, START, StateGraph
+
 from brusnika_knowledge_layer.graph.nodes import OrchestratorNodes
+from brusnika_knowledge_layer.graph.state import RAGState
+
 
 def route_after_grader(state: RAGState) -> str:
     """Функция маршрутизации. Решает, куда идти после оценки контекста."""

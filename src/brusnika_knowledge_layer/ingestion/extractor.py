@@ -1,7 +1,8 @@
 import re
 import uuid
-from typing import Dict, List, Tuple
+
 from brusnika_knowledge_layer.schema import RawDocument
+
 
 class TableExtractor:
     def __init__(self, llm_client=None):
@@ -18,14 +19,14 @@ class TableExtractor:
             if not self.llm_client:
                 return "Сгенерированное текстовое описание данных из таблицы (Mock)."
             
-            print(f"      [LLM] Генерирую саммари для таблицы...")
+            print("      [LLM] Генерирую саммари для таблицы...")
             prompt = f"Сделай подробное текстовое описание данных из этой Markdown-таблицы. Пиши только описание, без лишних вступлений:\n\n{raw_table}"
             
             # Реальный вызов локальной модели
             response = self.llm_client.invoke(prompt)
             return response.content
 
-    def process_document(self, doc: RawDocument) -> Tuple[RawDocument, List[Dict[str, str]]]:
+    def process_document(self, doc: RawDocument) -> tuple[RawDocument, list[dict[str, str]]]:
         """
         Находит таблицы, заменяет их на ID и возвращает измененный документ + список извлеченных таблиц.
         """

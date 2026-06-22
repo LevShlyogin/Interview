@@ -1,6 +1,7 @@
 import streamlit as st
-from brusnika_knowledge_layer.graph.workflow import build_rag_graph
+
 from brusnika_knowledge_layer.graph.state import RAGState
+from brusnika_knowledge_layer.graph.workflow import build_rag_graph
 
 # Настройка страницы
 st.set_page_config(page_title="БРУСНИКА | База Знаний", page_icon="🏢", layout="centered")

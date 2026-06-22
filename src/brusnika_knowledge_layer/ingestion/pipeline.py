@@ -1,8 +1,10 @@
-from brusnika_knowledge_layer.ingestion.parser import DocumentParser
-from brusnika_knowledge_layer.ingestion.extractor import TableExtractor
-from brusnika_knowledge_layer.ingestion.splitter import HierarchicalSplitter
-from brusnika_knowledge_layer.database.qdrant_manager import QdrantManager
 from langchain_ollama import ChatOllama
+
+from brusnika_knowledge_layer.database.qdrant_manager import QdrantManager
+from brusnika_knowledge_layer.ingestion.extractor import TableExtractor
+from brusnika_knowledge_layer.ingestion.parser import DocumentParser
+from brusnika_knowledge_layer.ingestion.splitter import HierarchicalSplitter
+
 
 def run_full_ingestion():
     """Полный цикл загрузки всей базы знаний в Qdrant."""

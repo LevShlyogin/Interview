@@ -1,8 +1,11 @@
+import os
 from typing import Any
 
 from fastembed import SparseTextEmbedding, TextEmbedding
 from qdrant_client import QdrantClient, models
 from sentence_transformers import CrossEncoder
+
+os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 
 
 class HybridRetriever:
